@@ -1,6 +1,6 @@
 # Block-ALISTA 
 
-We present deep unfolding using the block iterative shrinkage thresholding algorithm (BISTA). The general idea of deep unfolding is that we interpret an iterative algorithm as a neural network and learn the weights through data-driven optimisation. We then apply this to BISTA and thus present learned BISTA (LBISTA). We also present Analytical LBISTA, where we compute the analytical weight matrix through data-free optimization. Furthermore we provide two solution strategies to solve this data-free optimization problem.
+We present deep unfolding using the block iterative shrinkage thresholding algorithm (BISTA). The general idea of deep unfolding is that we interpret an iterative algorithm as a neural network and learn the weights through data-driven optimization. We then apply this to BISTA and thus present learned BISTA (LBISTA). We also present Analytical LBISTA, where we compute the analytical weight matrix through data-free optimization. Furthermore we provide two solution strategies to solve this data-free optimization problem.
 
 # Run Code
 
