@@ -39,7 +39,7 @@ for k in range(0, len(SNR_list)):
     print( 'Took me {totaltime:.3f} minutes for setup training'.format(totaltime = (end-start)/60))
 
     # sess = train.do_training(training_stages,prob,'TiBLISTA_block_Gauss_giidT12Thermo6-Jan.npz')
-    sess = train.do_training(training_stages,prob,'trainings/small_normalized_D_TiLBISTA_block_Gauss_giidT'+str(T)+'Thermo6-JanWithSNR_dB'+str(SNR)+'batch'+str(MC)+'.npz')
+    sess = train.do_training(training_stages,prob,'trainings/TiLBISTA_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC)+'.npz')
     """# Evaluating"""
     # sparsemat = sio.loadmat('mat/normalized_D_blocktestSNR'+str(SNR)+'.mat')
     # y = sparsemat.get('y')

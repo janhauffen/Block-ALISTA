@@ -28,7 +28,7 @@ for k in range(0, len(SNR_list)):
     # SNR = np.inf #wird SNR_dB = -10 mein Gegenbeispiel?
     SNR = SNR_list[k]
     MC = 250
-    prob = problem.block_gaussian_trial(m=50, L=75, B=1, MC=MC, pnz=0.1, SNR_dB=SNR) # a Block-Gaussian x, noisily observed through a random matrix
+    prob = problem.block_gaussian_trial(m=50, L=15, B=5, MC=MC, pnz=0.1, SNR_dB=SNR) # a Block-Gaussian x, noisily observed through a random matrix
     # pdb.set_trace()
     # layers, W = network.build_BALISTA(prob,T=T,initial_lambda=0.1, initial_gamma=2/(1.01*la.norm(prob.A,2)**2), untied=False)
     layers, W = network.build_BALISTA_v5(prob,T=T,initial_lambda=0.5, initial_gamma=0.1, untied=False)
@@ -40,7 +40,7 @@ for k in range(0, len(SNR_list)):
     print( 'Took me {totaltime:.3f} minutes for setup training'.format(totaltime = (end-start)/60))
 
     # sess = train.do_training(training_stages,prob,'TiBLISTA_block_Gauss_giidT12Thermo6-Jan.npz')
-    sess = train.do_training(training_stages,prob,'trainings/batch250_sparse_case_D_ALBISTA_CVX_v4_block_Gauss_giidT'+str(T)+'Thermo6-JanWithSNR_dB'+str(SNR)+'.npz')
+    sess = train.do_training(training_stages,prob,'trainings/batch250_D_ALBISTA_CVX_v4_block_Gauss_giidT'+str(T)+'Thermo6-JanWithSNR_dB'+str(SNR)+'.npz')
     """# Evaluating"""
     # sparsemat = sio.loadmat('blocktest.mat')
     # y = sparsemat.get('y')

@@ -27,7 +27,7 @@ for k in range(0, len(SNR_list)):
     T=16
     # SNR = np.inf
     SNR = SNR_list[k]
-    MC = 500
+    MC = 250
     prob = problem.block_gaussian_trial(m=50, L=15, B=5, MC=MC, pnz=0.1, SNR_dB=SNR)  # a Block-Gaussian x, noisily observed through a random matrix
     # pdb.set_trace()
     # layers, W = network.build_BALISTA(prob,T=T,initial_lambda=0.1, initial_gamma=2/(1.01*la.norm(prob.A,2)**2), untied=False)

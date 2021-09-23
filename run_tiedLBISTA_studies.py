@@ -26,7 +26,7 @@ for k in range(0, len(SNR_list)):
 
     T=16
     SNR = SNR_list[k]
-    MC = 500
+    MC = 250
     prob = problem.block_gaussian_trial(m=50, L=15, B=5, MC=MC, pnz=0.1, SNR_dB=SNR) # a Block-Gaussian x, noisily observed through a random matrix
     pdb.set_trace()
     # layers, W = network.build_BALISTA(prob,T=T,initial_lambda=0.1, initial_gamma=2/(1.01*la.norm(prob.A,2)**2), untied=False)
@@ -39,7 +39,7 @@ for k in range(0, len(SNR_list)):
     print( 'Took me {totaltime:.3f} minutes for setup training'.format(totaltime = (end-start)/60))
 
     # sess = train.do_training(training_stages,prob,'TiBLISTA_block_Gauss_giidT12Thermo6-Jan.npz')
-    sess = train.do_training(training_stages,prob,'trainings2/LBISTA_block_Gauss_giidT'+str(T)+'Thermo6-JanWithSNR_dB'+str(SNR)+'batch'+str(MC)+'.npz')
+    sess = train.do_training(training_stages,prob,'trainings/tiedLBISTA_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC)+'.npz')
     """# Evaluating"""
     sparsemat = sio.loadmat('mat/blocktestSNR'+str(SNR)+'.mat')
     y = sparsemat.get('y')
