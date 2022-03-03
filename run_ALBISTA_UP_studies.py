@@ -27,19 +27,16 @@ SNR = SNR_list[k]
 MC = 250
 prob = problem.block_gaussian_trial(m=50, L=15, B=5, MC=MC, pnz=0.1, SNR_dB=SNR) # a Block-Gaussian x, noisily observed through a random matrix
 # pdb.set_trace()
-# layers, W = network.build_BALISTA(prob,T=T,initial_lambda=0.1, initial_gamma=2/(1.01*la.norm(prob.A,2)**2), untied=False)
-layers, W = network.build_BALISTA_v4(prob,T=T,initial_lambda=0.5, initial_gamma=0.1, untied=False)
+layers, W = network.build_BALISTA_v4(prob,T=T,initial_lambda=0.5, initial_gamma=0.1)
 
 start = time.time()
-training_stages = train.setup_training(layers,prob,trinit=1e-3,refinements=(0.5, 0.01, 0.001))
+training_stages = train.setup_training(layers,prob,trinit=1e-3)
 end = time.time()
 print( 'Took me {totaltime:.3f} minutes for setup training'.format(totaltime = (end-start)/60))
 
 sess = train.do_training(training_stages,prob,'trainings/ALBISTA_UP_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC)+'.npz')
 """# Evaluating"""
-# sparsemat = sio.loadmat('blocktest.mat')
-# y = sparsemat.get('y')
-# x = sparsemat.get('x')
+
 y,x = prob(sess)
 # sio.savemat('mat/sparse_case_D_blocktestSNR' + str(SNR) + '.mat', {'x': x, 'y': y})
 # sparsemat = sio.loadmat('mat/D_blocktestSNR' + str(SNR) + '.mat')
