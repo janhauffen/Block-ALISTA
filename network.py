@@ -136,7 +136,7 @@ def build_LBISTA_untied(prob,T,initial_lambda=.1):
 
     return layers
 
-def build_LBISTA_CPSS(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
+def build_LBISTA_CPSS(prob, T, initial_lambda=.1, initial_gamma=1):
     """
     Builds a LBISTA_CPSS network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
@@ -169,7 +169,7 @@ def build_LBISTA_CPSS(prob, T, initial_lambda=.1, initial_gamma=1, untied=False)
 
     return layers
 
-def build_BALISTA_v4(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
+def build_BALISTA_v4(prob, T, initial_lambda=.1, initial_gamma=1):
     """
     Builds a BALISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
@@ -202,7 +202,7 @@ def build_BALISTA_v4(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
 
     return layers, W
 
-def build_BALISTA_v5(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
+def build_BALISTA_v5(prob, T, initial_lambda=.1, initial_gamma=1):
     """
     Builds a BALISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
@@ -235,7 +235,7 @@ def build_BALISTA_v5(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
 
     return layers, W
 
-def build_TiBLISTA(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
+def build_TiBLISTA(prob, T, initial_lambda=.1, initial_gamma=1):
     """
     Builds a TiBLISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
