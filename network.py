@@ -71,7 +71,7 @@ def block_soft_threshold_elastic_net(X_, al_, la_, prob):
 
 def build_LBISTA(prob,T,initial_lambda=.1):
     """
-    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    Builds a LBISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
     untied          - flag for tied or untied case
     Return a list of layer info (name,xhat_,newvars)
@@ -103,7 +103,7 @@ def build_LBISTA(prob,T,initial_lambda=.1):
 
 def build_LBISTA_untied(prob,T,initial_lambda=.1):
     """
-    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    Builds a LBISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
     untied          - flag for tied or untied case
     Return a list of layer info (name,xhat_,newvars)
@@ -138,7 +138,7 @@ def build_LBISTA_untied(prob,T,initial_lambda=.1):
 
 def build_LBISTA_CPSS(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
     """
-    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    Builds a LBISTA_CPSS network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
     untied          - flag for tied or untied case
     Return a list of layer info (name,xhat_,newvars)
@@ -158,20 +158,20 @@ def build_LBISTA_CPSS(prob, T, initial_lambda=.1, initial_gamma=1, untied=False)
     initial_lambda = np.array(initial_lambda).astype(np.float32)
     lam0_ = tf.Variable(initial_lambda, name='lam_0')
     xhat_ = blocksoft(tf.matmul(gamma0_*W_, prob.y_), lam0_, prob)
-    layers.append(('LBISTA T=1', xhat_, (lam0_,gamma0_,W_)))
+    layers.append(('LBISTA_CPSS T=1', xhat_, (lam0_,gamma0_,W_)))
     # pdb.set_trace()
     for t in range(1, T):
         lam_ = tf.Variable(initial_lambda, name='lam_{0}'.format(t))
         W_ = tf.Variable(np.transpose(W), dtype=tf.float32, name='W_{0}'.format(t), trainable = True)
         gamma_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_{0}'.format(t))
         xhat_ = blocksoft(xhat_ - tf.matmul(gamma_*W_, tf.matmul(prob.A_, xhat_) - prob.y_), lam_, prob)
-        layers.append(('LBISTA T=' + str(t + 1), xhat_, (lam_,gamma_,W_)))
+        layers.append(('LBISTA_CPSS T=' + str(t + 1), xhat_, (lam_,gamma_,W_)))
 
     return layers
 
 def build_BALISTA_v4(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
     """
-    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    Builds a BALISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
     untied          - flag for tied or untied case
     Return a list of layer info (name,xhat_,newvars)
@@ -192,19 +192,19 @@ def build_BALISTA_v4(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
     initial_lambda = np.array(initial_lambda).astype(np.float32)
     lam0_ = tf.Variable(initial_lambda, name='lam_0')
     xhat_ = blocksoft(tf.matmul(tf.math.abs(gamma0_)*W_, prob.y_), lam0_, prob)
-    layers.append(('LBISTA T=1', xhat_, (lam0_, gamma0_)))
+    layers.append(('BALISTA T=1', xhat_, (lam0_, gamma0_)))
     # pdb.set_trace()
     for t in range(1, T):
         lam_ = tf.Variable(initial_lambda, name='lam_{0}'.format(t))
         gamma_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_{0}'.format(t))
         xhat_ = blocksoft(xhat_ - tf.matmul(tf.math.abs(gamma_)*W_, tf.matmul(prob.A_, xhat_) - prob.y_), lam_, prob)
-        layers.append(('LBISTA T=' + str(t + 1), xhat_, (lam_,gamma_)))
+        layers.append(('BALISTA T=' + str(t + 1), xhat_, (lam_,gamma_)))
 
     return layers, W
 
 def build_BALISTA_v5(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
     """
-    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    Builds a BALISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
     untied          - flag for tied or untied case
     Return a list of layer info (name,xhat_,newvars)
@@ -225,19 +225,19 @@ def build_BALISTA_v5(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
     initial_lambda = np.array(initial_lambda).astype(np.float32)
     lam0_ = tf.Variable(initial_lambda, name='lam_0')
     xhat_ = blocksoft(tf.matmul(tf.math.abs(gamma0_)*W_, prob.y_), lam0_, prob)
-    layers.append(('LBISTA T=1', xhat_, (lam0_, gamma0_)))
+    layers.append(('BALISTA T=1', xhat_, (lam0_, gamma0_)))
     # pdb.set_trace()
     for t in range(1, T):
         lam_ = tf.Variable(initial_lambda, name='lam_{0}'.format(t))
         gamma_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_{0}'.format(t))
         xhat_ = blocksoft(xhat_ - tf.matmul(tf.math.abs(gamma_)*W_, tf.matmul(prob.A_, xhat_) - prob.y_), lam_, prob)
-        layers.append(('LBISTA T=' + str(t + 1), xhat_, (lam_,gamma_)))
+        layers.append(('BALISTA T=' + str(t + 1), xhat_, (lam_,gamma_)))
 
     return layers, W
 
 def build_TiBLISTA(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
     """
-    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    Builds a TiBLISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
     untied          - flag for tied or untied case
     Return a list of layer info (name,xhat_,newvars)
@@ -256,19 +256,19 @@ def build_TiBLISTA(prob, T, initial_lambda=.1, initial_gamma=1, untied=False):
     initial_lambda = np.array(initial_lambda).astype(np.float32)
     lam0_ = tf.Variable(initial_lambda, name='lam_0')
     xhat_ = blocksoft(tf.matmul(gamma0_*W_, prob.y_), lam0_, prob)
-    layers.append(('LBISTA T=1', xhat_, (lam0_,gamma0_)))
+    layers.append(('TiBLISTA T=1', xhat_, (lam0_,gamma0_)))
     # pdb.set_trace()
     for t in range(1, T):
         lam_ = tf.Variable(initial_lambda, name='lam_{0}'.format(t))
         gamma_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_{0}'.format(t))
         xhat_ = blocksoft(xhat_ - tf.matmul(gamma_*W_, tf.matmul(prob.A_, xhat_) - prob.y_), lam_, prob)
-        layers.append(('LBISTA T=' + str(t + 1), xhat_, (lam_,gamma_)))
+        layers.append(('TiBLISTA T=' + str(t + 1), xhat_, (lam_,gamma_)))
 
     return layers
 
 def build_LBFISTA(prob,T,initial_lambda=.1):
     """
-    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    Builds a LBFISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
     untied          - flag for tied or untied case
     Return a list of layer info (name,xhat_,newvars)
@@ -293,7 +293,7 @@ def build_LBFISTA(prob,T,initial_lambda=.1):
     xhat_ = blocksoft( By_, lam0_, prob)
     tk = (1+np.sqrt(1+4*1**2))*2**(-1)
     z_ = xhat_
-    layers.append( ('LBISTA T=1',xhat_, (lam0_,) ) )
+    layers.append( ('LBFISTA T=1',xhat_, (lam0_,) ) )
     #pdb.set_trace()
     for t in range(1,T):
         t_prev = tk
@@ -302,13 +302,13 @@ def build_LBFISTA(prob,T,initial_lambda=.1):
         xhat_ = blocksoft( tf.matmul(S_,z_) + By_, lam_, prob)
         tk = (1+np.sqrt(1+4*t_prev**2))*2**(-1)
         z_ = xhat_ + (t_prev-1)*(tk)**(-1)*(xhat_-xhat_prev_)
-        layers.append( ('LBISTA T='+str(t+1),xhat_,(lam_,)) )
+        layers.append( ('LBFISTA T='+str(t+1),xhat_,(lam_,)) )
 
     return layers
 
 def build_LBelastic_net(prob,T,initial_lambda=.1):
     """
-    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    Builds a LBelastic_net network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
     untied          - flag for tied or untied case
     Return a list of layer info (name,xhat_,newvars)
@@ -332,19 +332,19 @@ def build_LBelastic_net(prob,T,initial_lambda=.1):
     al0_ = tf.Variable( initial_lambda,name='al_0')
     lam0_ = tf.Variable( initial_lambda,name='lam_0')
     xhat_ = eta( By_, al0_, lam0_, prob)
-    layers.append( ('LBISTA T=1',xhat_, (al0_, lam0_) ) )
+    layers.append( ('LBelastic_net T=1',xhat_, (al0_, lam0_) ) )
     #pdb.set_trace()
     for t in range(1,T):
         al_ = tf.Variable( initial_lambda,name='al_{0}'.format(t) )
         lam_ = tf.Variable( initial_lambda,name='lam_{0}'.format(t) )
         xhat_ = eta( tf.matmul(S_,xhat_) + By_, al_, lam_, prob)
-        layers.append( ('LBISTA T='+str(t+1),xhat_,(al_, lam_)) )
+        layers.append( ('LBelastic_net T='+str(t+1),xhat_,(al_, lam_)) )
 
     return layers
   
 def build_UntiedLBelastic_net(prob,T,initial_lambda=.1):
     """
-    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    Builds a LBelastic_net network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
     untied          - flag for tied or untied case
     Return a list of layer info (name,xhat_,newvars)
@@ -367,7 +367,7 @@ def build_UntiedLBelastic_net(prob,T,initial_lambda=.1):
     al0_ = tf.Variable( initial_lambda,name='al_0')
     lam0_ = tf.Variable( initial_lambda,name='lam_0')
     xhat_ = eta( By_, al0_, lam0_, prob)
-    layers.append( ('LBISTA T=1',xhat_, (al0_, lam0_, B_, S_) ) )
+    layers.append( ('LBelastic_net T=1',xhat_, (al0_, lam0_, B_, S_) ) )
     #pdb.set_trace()
     for t in range(1,T):
         al_ = tf.Variable( initial_lambda,name='al_{0}'.format(t) )
@@ -376,13 +376,13 @@ def build_UntiedLBelastic_net(prob,T,initial_lambda=.1):
         By_ = tf.matmul(B_,prob.y_)
         S_ = tf.Variable( np.identity(N) - np.matmul(B,A),dtype=tf.float32,name='S_{0}'.format(t) )
         xhat_ = eta( tf.matmul(S_,xhat_) + By_, al_, lam_, prob)
-        layers.append( ('LBISTA T='+str(t+1),xhat_,(al_, lam_, B_, S_)) )
+        layers.append( ('LBelastic_net T='+str(t+1),xhat_,(al_, lam_, B_, S_)) )
 
     return layers
 
 def build_LBFastelastic_net(prob,T,initial_lambda=.1):
     """
-    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    Builds a LBFastelastic_net network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
     prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
     untied          - flag for tied or untied case
     Return a list of layer info (name,xhat_,newvars)
@@ -408,7 +408,7 @@ def build_LBFastelastic_net(prob,T,initial_lambda=.1):
     xhat_ = eta( By_, al0_, lam0_, prob)
     tk = (1+np.sqrt(1+4*1**2))*2**(-1)
     z_ = xhat_
-    layers.append( ('LBISTA T=1',xhat_, (al0_, lam0_) ) )
+    layers.append( ('LBFastelastic_net T=1',xhat_, (al0_, lam0_) ) )
     #pdb.set_trace()
     for t in range(1,T):
         t_prev = tk
@@ -418,7 +418,7 @@ def build_LBFastelastic_net(prob,T,initial_lambda=.1):
         xhat_ = eta( tf.matmul(S_,z_) + By_, al_, lam_, prob)
         tk = (1+np.sqrt(1+4*t_prev**2))*2**(-1)
         z_ = xhat_ + (t_prev-1)*(tk)**(-1)*(xhat_-xhat_prev_)
-        layers.append( ('LBISTA T='+str(t+1),xhat_,(al_, lam_)) )
+        layers.append( ('LBFastelastic_net T='+str(t+1),xhat_,(al_, lam_)) )
 
     return layers
 
@@ -435,7 +435,7 @@ def build_LADMM(prob, T, initial_lambda=.1, initial_rho=.1):
     x1_ = tf.matmul(tf.linalg.inv(B_),tf.matmul(tf.transpose(A_), prob.y_))
     z1_ = prox(x1_, lam_,prob)
     u1_ = x1_
-    layers.append(('ADMM T=1', z1_, (lam_, rho_, A_)))
+    layers.append(('LADMM T=1', z1_, (lam_, rho_, A_)))
     for t in range(1, T):
         lam_ = tf.Variable(initial_lambda, name=f'lam_{t}')
         rho_ = tf.Variable(initial_rho, name=f'rho_{t}')
@@ -443,6 +443,6 @@ def build_LADMM(prob, T, initial_lambda=.1, initial_rho=.1):
         x1_ = tf.matmul(tf.linalg.inv(B_), (tf.matmul(tf.transpose(A_), prob.y_)) + rho_ * (z1_ - u1_))
         z1_ = prox(x1_ + u1_, lam_,prob)
         u1_ = u1_ + x1_ - z1_
-        layers.append(('ADMM T=' + str(t+1), z1_, (lam_,rho_, A_)))
+        layers.append(('LADMM T=' + str(t+1), z1_, (lam_,rho_, A_)))
 
     return layers
