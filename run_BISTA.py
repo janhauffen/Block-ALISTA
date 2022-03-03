@@ -29,7 +29,7 @@ MC = 250
 prob = problem.block_gaussian_trial(m=50, L=15, B=5, MC=MC, pnz=0.1, SNR_dB=SNR)  # a Block-Gaussian x, noisily observed through a random matrix
 # pdb.set_trace()
 # layers, W = network.build_BALISTA(prob,T=T,initial_lambda=0.1, initial_gamma=2/(1.01*la.norm(prob.A,2)**2), untied=False)
-layers = network.build_TiBLISTA(prob,T=T,initial_lambda=0.1, initial_gamma=1/(1.01*la.norm(prob.A,2)**2), untied=False)
+layers = network.build_TiBLISTA(prob,T=T,initial_lambda=0.1, initial_gamma=1/(1.01*la.norm(prob.A,2)**2))
 #layers = network.build_TiBLISTA(prob,T=T,initial_lambda=0.1, initial_gamma=1, untied=False)
 # pdb.set_trace()
 start = time.time()
