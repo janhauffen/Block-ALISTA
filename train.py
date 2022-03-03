@@ -45,7 +45,7 @@ def save_trainable_vars(sess, filename, **kwargs):
     np.savez(filename, **save)
 
 
-def setup_training(layer_info, prob, trinit=1e-3, refinements=(.5, .1, .01), final_refine=None):
+def setup_training(layer_info, prob, trinit=1e-3, final_refine=None):
     # with tf.device('/device:GPU:0'):
     """ Given a list of layer info (name,xhat_,newvars),
     create an output list of training operations (name,xhat_,loss_,nmse_,trainop_ ).
@@ -78,9 +78,7 @@ def setup_training(layer_info, prob, trinit=1e-3, refinements=(.5, .1, .01), fin
         if var_list is not None:
             train_ = tf.train.AdamOptimizer(tr_).minimize(loss_, var_list=var_list)
             training_stages.append((name, xhat_, loss_, nmse_, se_, train_, var_list))
-        # for fm in refinements:
-        #      train2_ = tf.train.AdamOptimizer(tr_ * fm).minimize(loss_)
-        #      training_stages.append((name + ' trainrate=' + str(fm), xhat_, loss_, nmse_, se_, train2_, ()))
+        
     if final_refine:
         train2_ = tf.train.AdamOptimizer(tr_ * final_refine).minimize(loss_)
         training_stages.append((name + ' final refine ' + str(final_refine), xhat_, loss_, nmse_, se_, train2_, ()))
