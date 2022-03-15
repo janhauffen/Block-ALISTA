@@ -83,7 +83,7 @@ def mmv_problem(A_s, L=128, B=15, MC=1000, pnz=.1, SNR_dB=20):
     # and thus using the proposed Learned Block Methods
     # A_s is the observation matrix, i.e. y_l = A_s@x_l, l=1,..., B
     N = B * L  # N is the length of a the unknown block-sparse x
-    m = N
+    m = A_s.shape[0]*B
     A = np.kron(A_s, np.eye(B)).astype('float32')
     A_ = tf.constant(A, name='A')
     prob = TFGenerator(A=A, A_=A_, kappa=None, SNR=SNR_dB)
