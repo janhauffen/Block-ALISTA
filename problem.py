@@ -78,12 +78,15 @@ def block_gaussian(m=128, L=32, B=16, MC=1000, pnz=.1, SNR_dB=20):
 
     return prob
 
-def mmv_problem(A_s, L=128, B=15, MC=1000, pnz=.1, SNR_dB=20):
-    # MMV Problem: L is the dimension of one measurements, B the number of measurements. Casting this into block sparse setting
+def mmv_problem(A_s, B=15, MC=1000, pnz=.1, SNR_dB=20):
+    # MMV Problem: B is the number of measurements. Casting this into block sparse setting
     # and thus using the proposed Learned Block Methods
     # A_s is the observation matrix, i.e. y_l = A_s@x_l, l=1,..., B
-    N = B * L  # N is the length of a the unknown block-sparse x
+    # N = B * L  # N is the length of a the unknown block-sparse x
+    L = A_s.shape[1]
     m = A_s.shape[0]*B
+    N = L*B
+
     A = np.kron(A_s, np.eye(B)).astype('float32')
     A_ = tf.constant(A, name='A')
     prob = TFGenerator(A=A, A_=A_, kappa=None, SNR=SNR_dB)
@@ -101,11 +104,11 @@ def mmv_problem(A_s, L=128, B=15, MC=1000, pnz=.1, SNR_dB=20):
     ones_ = tf.ones([L, B, MC])
 
     product_ = tf.multiply(active_blocks_, ones_)
-    xgen_ = tf.reshape(product_, [L * B, MC])
+    xgen_ = tf.reshape(product_, [N, MC])
     xgen_ = tf.multiply(xgen_, tf.random_normal((N, MC), 0, 1))
 
     # adding noise
-    noise_var = pnz * N / m * math.pow(10., -SNR_dB / 10.)
+    noise_var = pnz * N/m* math.pow(10., -SNR_dB / 10.)
     ygen_ = tf.matmul(A_, xgen_) + tf.random_normal((m, MC), stddev=math.sqrt(noise_var))
 
     active_blocks_val = (np.random.uniform(0, 1, (L, MC)) < pnz).astype(np.float32)
@@ -118,6 +121,7 @@ def mmv_problem(A_s, L=128, B=15, MC=1000, pnz=.1, SNR_dB=20):
     prob.xval = xval
     prob.yval = yval
     prob.noise_var = noise_var
-    prob.noise = np.random.normal(0, math.sqrt(noise_var), (m))
+    prob.noise = np.random.normal(0, math.sqrt(noise_var), (N))
 
     return prob
+
