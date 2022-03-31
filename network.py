@@ -17,22 +17,19 @@ import keras.backend as K
 #import cvxpy as cp
 
 def SolveViaFFT(D):
-    # In the setting of an circular convolution MMV Problem we have an easy way to compute the analytical weight matrix
+    # In the setting of a circular convolution MMV Problem we have an easy way to compute the analytical weight matrix
     m,n = D.shape
-    k_hat=np.zeros(n)
-    F = np.fft.fft(np.eye(m))
-    s = (((np.fft.fft(D[:,0]))))
-    #s = F@D[:,0]
-    k_hat=np.conj(1/s)
+    k_hat = np.zeros(n)
+    F = np.fft.fft(np.eye(m), norm = 'ortho')
+    s = F@D[:,0]
+    k_hat=1/np.conj(s)
 
     for i in range(0,n):
-        if np.abs(np.conj(s[i]))>1e-16:
-            i
-      #k_hat[i]=(np.conj(1/s[i])) #THE IMAGINARY PART GETS LOST HERE?????
-        else:
-            k_hat[i]=0
+        if 2/(n**2)*np.abs(np.real(np.conj(s[i])))<1e-10:
+            k_hat[i]=0 
     
-    B_5 = (1/(n)*np.conj(F).T@np.diag(k_hat)@F)
+    #pdb.set_trace()
+    B_5 = 1/np.sqrt(n)*np.conj(F).T@np.diag(k_hat)@F
     return np.real(B_5)
 
 def block_soft_threshold(X_, al_, prob):
@@ -445,6 +442,54 @@ def build_CircALBISTA(prob, W, T, initial_lambda=.1, initial_gamma=1):
         gamma_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_{0}'.format(t))
         xhat_ = blocksoft(xhat_ - tf.matmul(tf.math.abs(gamma_)*W_, tf.matmul(prob.A_, xhat_) - prob.y_), lam_, prob)
         layers.append(('CircALBISTA T=' + str(t + 1), xhat_, (lam_,gamma_)))
+
+    return layers
+
+def newfft(X_):
+    # Circumvent problem for placeholder with dimension (n, batch) -> (batch, n)
+    return (tf.signal.rfft(tf.transpose(X_)))
+
+def newifft(X_):
+    # Circumvent problem for placeholder with dimension (batch, n) -> (n, batch)
+    return tf.transpose(tf.signal.irfft((X_)))
+
+
+def build_FFT_ALBISTA(prob, W, T, initial_lambda=.1, initial_gamma=1):
+    """
+    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
+    Return a list of layer info (name,xhat_,newvars)
+     name : description, e.g. 'LISTA T=1'
+     xhat_ : that which approximates x_ at some point in the algorithm
+     newvars : a tuple of layer-specific trainable variables
+    """
+    blocksoft = block_soft_threshold
+    layers = []
+    A = prob.A[:,0]
+    gamma = initial_gamma
+    gamma0_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_0')
+
+    W_ = tf.Variable(W.T[:,0], dtype=tf.float32, trainable = False)
+    
+    initial_lambda = np.array(initial_lambda).astype(np.float32)
+    lam0_ = tf.Variable(initial_lambda, name='lam_0')
+    #pdb.set_trace()
+    #xhat_ = blocksoft(tf.matmul(tf.math.abs(gamma0_)*W_, prob.y_), lam0_, prob)
+    xhat_ = blocksoft(tf.math.abs(gamma0_)*newifft(tf.signal.rfft(W_)*newfft(prob.y_)), lam0_, prob)
+    layers.append(('CircALBISTA T=1', xhat_, (lam0_, gamma0_)))
+    e = np.zeros(A.shape)
+    e[0] = 1
+    
+    # pdb.set_trace()
+    for t in range(1, T):
+        lam_ = tf.Variable(initial_lambda, name='lam_{0}'.format(t))
+        gamma_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_{0}'.format(t))
+        #xhat_ = blocksoft(xhat_ - tf.matmul(tf.math.abs(gamma_)*W_, tf.matmul(prob.A_, xhat_) - prob.y_), lam_, prob)
+        f = tf.signal.rfft(e-tf.math.abs(gamma_)*tf.signal.irfft(tf.signal.rfft(W_)*tf.signal.rfft(A)))
+        #xhat_ = newifft(f*newfft(xhat_)) + newifft(tf.signal.rfft(W_)*newfft(prob.y_))
+        xhat_ = xhat_ - tf.math.abs(gamma_)*newifft(tf.signal.rfft(W_)*newfft(newifft(tf.signal.rfft(A)*newfft(xhat_))-prob.y_))
+        xhat_ = blocksoft(xhat_, lam_, prob)
+        layers.append(('CircALBISTA T=' + str(t + 1), xhat_, (lam_, gamma_)))
 
     return layers
 
