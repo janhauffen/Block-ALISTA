@@ -466,16 +466,18 @@ def build_FFT_ALBISTA(prob, W, T, initial_lambda=.1, initial_gamma=1):
     blocksoft = block_soft_threshold
     layers = []
     A = prob.A[:,0]
+    A = tf.signal.rfft(A)
     gamma = initial_gamma
     gamma0_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_0')
 
     W_ = tf.Variable(W.T[:,0], dtype=tf.float32, trainable = False)
+    W_ = tf.signal.rfft(W_)
     
     initial_lambda = np.array(initial_lambda).astype(np.float32)
     lam0_ = tf.Variable(initial_lambda, name='lam_0')
     #pdb.set_trace()
     #xhat_ = blocksoft(tf.matmul(tf.math.abs(gamma0_)*W_, prob.y_), lam0_, prob)
-    xhat_ = blocksoft(tf.math.abs(gamma0_)*newifft(tf.signal.rfft(W_)*newfft(prob.y_)), lam0_, prob)
+    xhat_ = blocksoft(tf.math.abs(gamma0_)*newifft(W_*newfft(prob.y_)), lam0_, prob)
     layers.append(('CircALBISTA T=1', xhat_, (lam0_, gamma0_)))
     e = np.zeros(A.shape)
     e[0] = 1
@@ -485,9 +487,9 @@ def build_FFT_ALBISTA(prob, W, T, initial_lambda=.1, initial_gamma=1):
         lam_ = tf.Variable(initial_lambda, name='lam_{0}'.format(t))
         gamma_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_{0}'.format(t))
         #xhat_ = blocksoft(xhat_ - tf.matmul(tf.math.abs(gamma_)*W_, tf.matmul(prob.A_, xhat_) - prob.y_), lam_, prob)
-        f = tf.signal.rfft(e-tf.math.abs(gamma_)*tf.signal.irfft(tf.signal.rfft(W_)*tf.signal.rfft(A)))
+        #f = tf.signal.rfft(e-tf.math.abs(gamma_)*tf.signal.irfft(W_*A))
         #xhat_ = newifft(f*newfft(xhat_)) + newifft(tf.signal.rfft(W_)*newfft(prob.y_))
-        xhat_ = xhat_ - tf.math.abs(gamma_)*newifft(tf.signal.rfft(W_)*newfft(newifft(tf.signal.rfft(A)*newfft(xhat_))-prob.y_))
+        xhat_ = xhat_ - tf.math.abs(gamma_)*newifft(W_*newfft(newifft(A*newfft(xhat_))-prob.y_))
         xhat_ = blocksoft(xhat_, lam_, prob)
         layers.append(('CircALBISTA T=' + str(t + 1), xhat_, (lam_, gamma_)))
 
