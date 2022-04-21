@@ -49,17 +49,18 @@ def nmse(xhat,x):
 def nmse_db(xhat,x):
     return 10*np.log10(nmse(xhat,x))
 
-def compute_W_Lagrange(D,M,d):
+def compute_W_Lagrange(D,L,d):
     W = np.zeros(D.shape)
     m,n = D.shape
-    for i in range(0,M):
+    for i in range(0,L):
         #pdb.set_trace()
-        A1 = np.concatenate((np.kron(np.eye(d), D@D.T), np.kron(np.eye(d), D[:, i*d: (i+1)*d])), axis=1)
-        A2 = np.concatenate((np.kron(np.eye(d), D[:, i*d: (i+1)*d].T), np.zeros((d**2, d**2))),axis=1)
+        A1 = np.concatenate((2*D@D.T, D[:, i*d: (i+1)*d]), axis=1)
+        A2 = np.concatenate((D[:, i*d: (i+1)*d].T, np.zeros((d, d))),axis=1)
         A = np.concatenate((A1,A2), axis = 0)
-        rhs = np.concatenate((np.zeros((d*m,1)), np.reshape(np.eye(d), (d**2,1))))
+        #pdb.set_trace()
+        rhs = np.concatenate((np.zeros((m,d)), np.eye(d)))
         X = linalg.pinv(A)@rhs
-        W[:,i * d:(i + 1) * d] = np.reshape(X[0:d*m, :], (m,d))
+        W[:,i * d:(i + 1) * d] = X[0:m,:]
 
     return W
 
