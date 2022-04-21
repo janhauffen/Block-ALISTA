@@ -49,59 +49,6 @@ def nmse(xhat,x):
 def nmse_db(xhat,x):
     return 10*np.log10(nmse(xhat,x))
 
-def compute_W_v1(A,M,d):
-    #via pseudo inverse
-    W = np.zeros(A.shape)
-    for i in range(0, M):
-        W[:, i*d:(i+1)*d] = np.linalg.pinv(A[:, i*d: (i+1)*d].T)
-    return W
-
-def compute_W_v2(A,M,d):
-    #pseudo inverse via svd
-    W = np.zeros(A.shape)
-    for i in range(0,M):
-        u,s,v = np.linalg.svd(A[:,i*d: (i+1)*d].T)
-        m,n = A[:,i*d: (i+1)*d].T.shape
-        r = s.shape[0]
-        if n==r:
-            Sigma1 = np.diag(s**(-1))
-            Sigma2 = np.zeros((n-r,m))
-            Sigma = np.concatenate((Sigma1, Sigma2), axis=0)
-        if n!=r:
-            Sigma1 = np.concatenate((np.diag(s**(-1)), np.zeros((r,m-r))), axis=1)
-            Sigma2 = np.zeros((n-r,m))
-            Sigma = np.concatenate((Sigma1, Sigma2), axis=0)
-        W[:,i*d:(i+1)*d] = v@Sigma@u.T
-    return W
-
-def compute_W_v3(A,M,d):
-    #via pseudo inverse
-    W = np.zeros(A.shape)
-    for i in range(0, M):
-        W[:, i*d:(i+1)*d] = linalg.pinv(A[:, i*d: (i+1)*d].T)
-    return W
-
-def compute_W_v4(A,M,d):
-    #via pseudo inverse
-    W = np.zeros(A.shape)
-    for i in range(0, M):
-        W[:, i*d:(i+1)*d] = linalg.pinv2(A[:, i*d: (i+1)*d].T)
-    return W
-
-def compute_W_v5(A,M,d):
-    # theoretically right...
-    W = np.zeros(A.shape)
-    for i in range(0, M):
-        W[:, i*d:(i+1)*d] = np.linalg.inv(A[:, i*d: (i+1)*d]@A[:, i*d: (i+1)*d].T)@A[:, i*d: (i+1)*d]
-    return W
-
-def compute_W_v6(A,M,d):
-    # works good with algorithm
-    W = np.zeros(A.T.shape)
-    for i in range(0, M):
-        W[i*d:(i+1)*d,:] = np.linalg.inv(A[:, i*d: (i+1)*d].T@A[:, i*d: (i+1)*d])@A[:, i*d: (i+1)*d].T
-    return W.T
-
 def compute_W_Lagrange(D,M,d):
     W = np.zeros(D.shape)
     m,n = D.shape
