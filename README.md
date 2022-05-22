@@ -5,5 +5,5 @@ We present deep unfolding using the block iterative shrinkage thresholding algor
 # Run Code
 
 0. To test the code, we provided the conda environment env.yml. We highly recommend to use a conda virtual environment to install the dependencies. Additionally the cvxpy toolbox is necessary for some scripts. 
-1. We provide the main notebooks, ```run***.ipynb```. These train the networks and evaluate the NMSE over iterations, reconstructions and the regularization parameters for a block sparse setting as well as a more specific mmv setting.
+1. We provide the main scripts, ```run***.py```. These train the networks and evaluate the NMSE over iterations, reconstructions and the regularization parameters for a block sparse setting as well as a more specific mmv setting.
 2. We also provide with ```Example_Optimize_GenBlockCoheherence.ipynb``` a jupyter-notebook, based on the cvxpy-package, to examine the two solution strategies to solve the data-free optimization problem.
