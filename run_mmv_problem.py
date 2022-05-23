@@ -85,11 +85,11 @@ T = 6 # number of layers/iterations
 
 W = bst.compute_W_Lagrange(prob.A_s, prob.L, 1)
 
-layers = network_mmv.build_CircALBISTA(prob, np.kron(W ,np.eye(d)), T, initial_lambda=1e-1, initial_gamma=1)#/(1.01*np.linalg.norm(W.T@prob.A_s, 2)))
-#layers = network_mmv.build_TiBLISTA(prob, prob.A_s, T, initial_lambda=1e-1, initial_gamma=2/ (1.01*np.linalg.norm(prob.A_s,2)**2))
+layers = network.build_MMV_ALAMP(prob, np.kron(W ,np.eye(d)), T, initial_lambda=1e-1, initial_gamma=1)#/(1.01*np.linalg.norm(W.T@prob.A_s, 2)))
+#layers = network.build_TiBLISTA(prob, prob.A_s, T, initial_lambda=1e-1, initial_gamma=2/ (1.01*np.linalg.norm(prob.A_s,2)**2))
 
-#layers = network_mmv.build_CircALBISTA(prob, np.kron(W[:,0:m+1],np.eye(d)), T, initial_lambda=1e-1, initial_gamma=1/(np.linalg.norm(prob.A_s)))
-#layers = network_mmv.build_TiBLISTA(prob, T, initial_lambda=1e-1, initial_gamma=1/(np.linalg.norm(prob.A_s)))
+#layers = network.build_CircALBISTA(prob, np.kron(W[:,0:m+1],np.eye(d)), T, initial_lambda=1e-1, initial_gamma=1/(np.linalg.norm(prob.A_s)))
+#layers = network.build_TiBLISTA(prob, T, initial_lambda=1e-1, initial_gamma=1/(np.linalg.norm(prob.A_s)))
 
 start = time.time()
 training_stages = train.setup_training(layers,prob,trinit=1e-3)
@@ -98,7 +98,7 @@ print( 'Took me {totaltime:.3f} minutes for setup training'.format(totaltime = (
 
 # Train!
 # 
-sess, nmse_history, loss_history, nmse_switch  = train.do_training(training_stages,prob,'train_'+str(m)+'/ALBISTA_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC)+'.npz')
+sess, nmse_history, loss_history, nmse_switch  = train.do_training(training_stages,prob,'train_'+str(m)+'/MMV_LAMP_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC)+'.npz')
 #sess = train.do_training(training_stages,prob,'LBISTA-TiLBISTA_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC)+'.npz')
 
 ##################### nur fuer orig BISTA########################
@@ -139,7 +139,7 @@ for name, xhat_, var_list in layers:
 #plt.plot(np.log(lam/gam))
 #plt.plot(W[:,0])
 #plt.savefig('ALBISTA_Thm_T'+str(T)+'.png')
-#sio.savemat('mat_2/proposed_gamma_ALBISTA_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC), {'nmse_dbLISTAMean': nmse_dbLISTAMean, 'l2normLISTAMean': l2normLISTAMean, 'l2normmax': l2normmax, 'nmse_history': nmse_history, 'loss_history': loss_history, 'nmse_switch': nmse_switch})
+sio.savemat('mat_'+str(m)+'/MMV_LAMP_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC), {'nmse_dbLISTAMean': nmse_dbLISTAMean, 'l2normLISTAMean': l2normLISTAMean, 'l2normmax': l2normmax, 'nmse_history': nmse_history, 'loss_history': loss_history, 'nmse_switch': nmse_switch})
 #print(nmse_dbLISTAMean)
 
-sio.savemat('mat_'+str(m)+'/save_param_ALBISTA_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC)+'mat', {'nmse_dbLISTAMean': nmse_dbLISTAMean, 'l2normLISTAMean': l2normLISTAMean, 'l2normmax': l2normmax, 'lam': lam, 'gam': gam})
+#sio.savemat('mat_'+str(m)+'/save_param_ALBISTA_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC)+'mat', {'nmse_dbLISTAMean': nmse_dbLISTAMean, 'l2normLISTAMean': l2normLISTAMean, 'l2normmax': l2normmax, 'lam': lam, 'gam': gam})
