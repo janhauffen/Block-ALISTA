@@ -45,7 +45,7 @@ def save_trainable_vars(sess, filename, **kwargs):
     np.savez(filename, **save)
 
 
-def setup_training(layer_info, prob, trinit=1e-3, final_refine=None):
+def setup_training(layer_info, prob, trinit=1e-3, final_refine=0.1):
     # with tf.device('/device:GPU:0'):
     """ Given a list of layer info (name,xhat_,newvars),
     create an output list of training operations (name,xhat_,loss_,nmse_,trainop_ ).
@@ -69,15 +69,14 @@ def setup_training(layer_info, prob, trinit=1e-3, final_refine=None):
         "sigma2_empirical_ = tf.reduce_mean((rhat_ - prob.x_)**2)"
 
         se_ = 2 * tf.nn.l2_loss(xhat_ - prob.x_)  # to get MSE, divide by / (L * N)
-
+        #pdb.set_trace()
         #if name == 'LBISTA T=6':
         if var_list is not None:
             train_ = tf.train.AdamOptimizer(tr_).minimize(loss_, var_list=var_list)
             training_stages.append((name, xhat_, loss_, nmse_, se_, train_, var_list))
         
-    if final_refine:
-        train2_ = tf.train.AdamOptimizer(tr_ * final_refine).minimize(loss_)
-        training_stages.append((name + ' final refine ' + str(final_refine), xhat_, loss_, nmse_, se_, train2_, ()))
+        #train2_ = tf.train.AdamOptimizer(tr_ * final_refine).minimize(loss_)
+        #training_stages.append((name + ' final refine ' + str(final_refine), xhat_, loss_, nmse_, se_, train2_, ()))
 
     return training_stages
 
@@ -101,7 +100,8 @@ def do_training(training_stages, prob, savefile, ivl=10, maxit=100000, better_wa
 
     done = state.get('done', [])
     log = str(state.get('log', ''))
-
+    nmse_his = []
+    nmse_switch = [] #save index of switching to next layer...
     for name, xhat_, loss_, nmse_, se_, train_, var_list in training_stages:
         start = time.time()
         if name in done:
@@ -114,7 +114,7 @@ def do_training(training_stages, prob, savefile, ivl=10, maxit=100000, better_wa
 
         print(name + ' ' + describe_var_list)
         nmse_history = []
-
+        loss_history = []
         for i in range(maxit + 1):
 
             if i % ivl == 0:
@@ -123,6 +123,7 @@ def do_training(training_stages, prob, savefile, ivl=10, maxit=100000, better_wa
                     #pdb.set_trace()
                     raise RuntimeError('nmse is NaN')
                 nmse_history = np.append(nmse_history, nmse)
+                nmse_his = np.append(nmse_his, nmse)
                 nmse_dB = 10 * np.log10(nmse)
                 nmsebest_dB = 10 * np.log10(nmse_history.min())
                 sys.stdout.write(
@@ -132,6 +133,7 @@ def do_training(training_stages, prob, savefile, ivl=10, maxit=100000, better_wa
                     print('')
                     age_of_best = len(nmse_history) - nmse_history.argmin() - 1  # how long ago was the best nmse?
                     if age_of_best * ivl > better_wait:
+                        nmse_switch.append(i)
                         break  # if it has not improved on the best answer for quite some time, then move along
             y, x = prob(sess)
 
@@ -140,6 +142,7 @@ def do_training(training_stages, prob, savefile, ivl=10, maxit=100000, better_wa
 
             train, xhat, loss = sess.run([train_, xhat_, loss_],
                                          feed_dict={prob.y_: y, prob.x_: x})  # hier fehler lam0=nan
+            loss_history.append(loss)
             train
         done = np.append(done, name)
 
@@ -153,4 +156,5 @@ def do_training(training_stages, prob, savefile, ivl=10, maxit=100000, better_wa
         state['done'] = done
         state['log'] = log
         save_trainable_vars(sess, savefile, **state)
-    return sess
+        
+    return sess, nmse_his, loss_history, nmse_switch
