@@ -581,3 +581,52 @@ def build_LADMM(prob, T, initial_lambda=.1, initial_rho=.1):
         layers.append(('LADMM T=' + str(t+1), z1_, (lam_,rho_, A_)))
 
     return layers
+
+def build_MMV_ALAMP(prob, W, T, initial_lambda=.1, initial_gamma=1):
+    """
+    Builds a LISTA network to infer x from prob.y_ = matmul(prob.A,x) + AWGN
+    prob            - is a TFGenerator which contains problem parameters and def of how to generate training data
+    Return a list of layer info (name,xhat_,newvars)
+     name : description, e.g. 'LISTA T=1'
+     xhat_ : that which approximates x_ at some point in the algorithm
+     newvars : a tuple of layer-specific trainable variables
+    """
+    blocksoft = block_soft_threshold
+    layers = []
+    A = prob.A
+    M,N = A.shape
+    gamma = initial_gamma
+    gamma0_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_0')
+
+    W_ = tf.Variable(W.T, dtype=tf.float32, trainable = False)
+    
+    initial_lambda = np.array(initial_lambda).astype(np.float32)
+    lam0_ = tf.Variable(initial_lambda, name='lam_0')
+    
+    #d_eta = (denoiser(self, r + delta, rvar_scaled)[0] - denoiser(self, r - delta, rvar_scaled)[0]) / (2*delta)
+#where delta = 0.01
+#dxdr_mean_ = torch.mean(d_eta, axis=1)
+#d_eta = dxdr_mean_ * N
+#bt_ = d_eta * OneOverM
+#vt_ = prob.y_ - tf.tensordot( prob.A_ , xhat_, axes=1 ) + vt_ * bt_
+    delta = 0.01
+    d_eta = (blocksoft(tf.zeros_like(prob.x_) + delta, lam0_, prob) - blocksoft(tf.zeros_like(prob.x_) - delta, lam0_, prob)) / (2*delta)
+    d_eta = tf.math.reduce_mean(d_eta, axis = 0) * N
+    bt_ = d_eta * 1/M
+    xhat_ = blocksoft(tf.matmul(tf.math.abs(gamma0_)*W_, prob.y_), lam0_, prob)
+    vt_ = prob.y_
+    
+    layers.append(('MMV ALAMP T=1', xhat_, (lam0_, gamma0_)))
+    #pdb.set_trace()
+    for t in range(1, T):
+        lam_ = tf.Variable(initial_lambda, name='lam_{0}'.format(t))
+        gamma_ = tf.Variable(gamma, dtype=tf.float32, name='gamma_{0}'.format(t))
+        d_eta = (blocksoft(xhat_ + delta, lam0_, prob) - blocksoft(xhat_ - delta, lam0_, prob)) / (2*delta)
+        d_eta = tf.math.reduce_mean(d_eta, axis = 0) * N
+        bt_ = d_eta * 1/M
+        vt_ = prob.y_ - tf.matmul(A, xhat_) + bt_ * vt_
+        
+        xhat_ = blocksoft(xhat_ + tf.matmul(tf.math.abs(gamma_)*W_, vt_), lam_, prob)
+        layers.append(('MMV ALAMP T=' + str(t + 1), xhat_, (lam_, gamma_)))
+
+    return layers
