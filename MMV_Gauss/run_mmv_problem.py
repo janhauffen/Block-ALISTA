@@ -58,7 +58,7 @@ print(la.norm(K,2))
 
 SNR = np.infty # signal to noise ratio given in dB
 MC = 250 # batch number
-prob = problem.mmv_problem(K,B=d, MC=MC, pnz=0.01, SNR_dB=SNR) 
+prob = problem.mmv_problem(K,B=d, MC=MC, pnz=0.1, SNR_dB=SNR) 
 
 # creating the network and setup training:
 
@@ -114,7 +114,7 @@ for name, xhat_, var_list in layers:
         k = k+1
 
 
-sio.savemat('mat_'+str(m)+'/pnz_001_Gauss_ALBISTA_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC), {'nmse_dbLISTAMean': nmse_dbLISTAMean, 'l2normLISTAMean': l2normLISTAMean, 'l2normmax': l2normmax, 'nmse_history': nmse_history, 'loss_history': loss_history, 'nmse_switch': nmse_switch})
+sio.savemat('mat_'+str(m)+'/Gauss_ALBISTA_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC), {'nmse_dbLISTAMean': nmse_dbLISTAMean, 'l2normLISTAMean': l2normLISTAMean, 'l2normmax': l2normmax, 'nmse_history': nmse_history, 'loss_history': loss_history, 'nmse_switch': nmse_switch})
 print(nmse_dbLISTAMean)
 
-sio.savemat('mat_'+str(m)+'/pnz_001_Gausssave_param_ALBISTA_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC)+'mat', {'nmse_dbLISTAMean': nmse_dbLISTAMean, 'l2normLISTAMean': l2normLISTAMean, 'l2normmax': l2normmax, 'lam': lam, 'gam': gam})
+sio.savemat('mat_'+str(m)+'/Gausssave_param_ALBISTA_case_'+str(case)+'_T'+str(T)+'_SNRdB_'+str(SNR)+'batch'+str(MC)+'mat', {'nmse_dbLISTAMean': nmse_dbLISTAMean, 'l2normLISTAMean': l2normLISTAMean, 'l2normmax': l2normmax, 'lam': lam, 'gam': gam})
