@@ -27,10 +27,6 @@ def SolveViaFFT(D):
     B_5 = np.real(u@np.diag(k_hat)@v)
     return B_5
 
-def SolveViaTheorem(prob):
-    D = prob.A
-    return B
-
 def block_soft_threshold(X_, al_, prob):
     L = prob.L
     B = prob.B
