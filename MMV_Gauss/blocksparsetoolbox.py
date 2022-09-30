@@ -118,21 +118,21 @@ def compute_W_Lagrange(D,M,d):
     return W
 
 def compute_W_Thm(D, n, d):
-    W = np.zeros(D.shape)
-    m,n = D.shape
-    for i in range(0,n):
-        #pdb.set_trace()
-        K = (2*D@D.T)@(2*D@D.T)+D[:,i * d:(i + 1) * d]@D[:,i * d:(i + 1) * d].T
-        K_p = linalg.inv(K)
-        E = 2*D@D.T@D[:,i * d:(i + 1) * d]
-        R = D[:,i * d:(i + 1) * d] - 2*D@D.T@K_p@E
-        S = - D[:,i * d:(i + 1) * d].T@K_p@E
-        L = R.T@R + S.T@S
-        I = np.eye((L.T@L).shape[0])
-        M = K_p@E@(I - linalg.inv(L)@L)
-        H = linalg.inv(L)@S.T + (I - linalg.inv(L)@L)@linalg.inv(I + M.T@M)@(K_p@E).T@K_p@(D[:,i * d:(i + 1) * d]-E@linalg.inv(L)@S.T)
-        W[:,i * d:(i + 1) * d] = K_p@(D[:,i * d:(i + 1) * d]-E@H)
-    return W
+  W = np.zeros(D.shape)
+  m,n = D.shape
+  for i in range(0,n):
+      #pdb.set_trace()
+      K = (2*D@D.T)@(2*D@D.T)+D[:,i * d:(i + 1) * d]@D[:,i * d:(i + 1) * d].T
+      K_p = linalg.pinv(K)
+      E = 2*D@D.T@D[:,i * d:(i + 1) * d]
+      R = D[:,i * d:(i + 1) * d] - 2*D@D.T@K_p@E
+      S = - D[:,i * d:(i + 1) * d].T@K_p@E
+      L = R.T@R + S.T@S
+      I = np.eye((L.T@L).shape[0])
+      M = K_p@E@(I - linalg.pinv(L)@L)
+      H = linalg.pinv(L)@S.T + (I - linalg.pinv(L)@L)@linalg.inv(I + M.T@M)@(K_p@E).T@K_p@(D[:,i * d:(i + 1) * d]-E@linalg.pinv(L)@S.T)
+      W[:,i * d:(i + 1) * d] = K_p@(D[:,i * d:(i + 1) * d]-E@H)
+  return W
 
 #2, 2*kron(eye(B), D*D'), kron(eye(B),D(:,(k-1)*B+1:k*B)
 #cat(2, kron(eye(B),D(:,(k-1)*B+1:k*B)'), zeros(B^2, B^2));
